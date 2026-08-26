@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DENEYAP - NLP Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #ff8c42;
+            --secondary: #fbbf24;
+            --dark-bg: #0f1419;
+            --dark-surface: #1e293b;
+            --dark-surface-alt: #334155;
+            --text-light: #f1f5f9;
+            --text-soft: #cbd5e1;
+            --border: #475569;
+            --success: #10b981;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-light);
+        }
+
+        .header {
+            background: var(--dark-surface);
+            border-bottom: 1px solid var(--border);
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--secondary);
+        }
+
+        .container {
+            display: flex;
+            min-height: calc(100vh - 60px);
+        }
+
+        .sidebar {
+            width: 250px;
+            background: var(--dark-surface);
+            border-right: 1px solid var(--border);
+            padding: 20px;
+        }
+
+        .sidebar-item {
+            color: var(--text-soft);
+            text-decoration: none;
+            padding: 10px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+        }
+
+        .sidebar-item:hover,
+        .sidebar-item.active {
+            background: var(--dark-surface-alt);
+            color: var(--primary);
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .page-title {
+            font-size: 28px;
+            color: var(--text-light);
+            margin-bottom: 30px;
+        }
+
+        .section {
+            background: var(--dark-surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-soft);
+        }
+
+        textarea {
+            width: 100%;
+            padding: 12px;
+            background: var(--dark-surface-alt);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-light);
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .btn-process {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: var(--dark-bg);
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .btn-process:hover {
+            transform: translateY(-2px);
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .result-card {
+            background: var(--dark-surface-alt);
+            border-left: 4px solid var(--primary);
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .result-label {
+            font-size: 11px;
+            color: var(--text-soft);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .result-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-light);
+            word-break: break-word;
+        }
+
+        .result-value.success {
+            color: var(--success);
+        }
+
+        .examples {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .example-btn {
+            background: var(--dark-surface-alt);
+            border: 1px solid var(--border);
+            color: var(--text-soft);
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s;
+            text-align: left;
+        }
+
+        .example-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: rgba(255, 140, 66, 0.05);
+        }
+
+        .confidence-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+            font-size: 12px;
+        }
+
+        .confidence-fill {
+            flex: 1;
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .confidence-progress {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--success));
+            border-radius: 3px;
+            transition: width 0.3s;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+
+            .main-content {
+                padding: 15px;
+            }
+
+            .result-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-title">🚀 DENEYAP - NLP Processor Demo</div>
+        <a href="dashboard.html" style="color: var(--text-soft); text-decoration: none;">← Dashboard'a Dön</a>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar">
+            <a href="dashboard.html" class="sidebar-item">📊 Dashboard</a>
+            <a href="kanban.html" class="sidebar-item">📋 Kanban Board</a>
+            <a href="nlp-demo.html" class="sidebar-item active">🧠 NLP Processor</a>
+        </aside>
+
+        <main class="main-content">
+            <h1 class="page-title">🧠 Doğal Dil İşlemci Demo</h1>
+
+            <!-- Input Section -->
+            <div class="section">
+                <div class="section-title">📝 Görev Tanımını Türkçe Gir</div>
+                
+                <div class="input-group">
+                    <label>Görev Açıklaması</label>
+                    <textarea id="nlpInput" placeholder="Örn: Ankara'da 3 gün içinde Lise öğrencileri için AI etkinliği, 50 kişi"></textarea>
+                </div>
+
+                <button class="btn-process" onclick="processNLP()">🔍 İşle</button>
+
+                <div class="input-group" style="margin-top: 20px;">
+                    <label>Hızlı Örnekler</label>
+                    <div class="examples">
+                        <button class="example-btn" onclick="useExample('Ankara\\'da 3 gün içinde Lise öğrencileri için AI etkinliği, 50 kişi')">
+                            📌 Ankara Lise Etkinliği
+                        </button>
+                        <button class="example-btn" onclick="useExample('İstanbul Üniversitesi\\'nden acil: 250 öğrenci için seminer Perşembe saat 14:00\\'te')">
+                            ⚡ İstanbul Semineri (Acil)
+                        </button>
+                        <button class="example-btn" onclick="useExample('İzmir\\'de Öğretmen Eğitimi Programı, 40 kişi, gelecek hafta başlayacak')">
+                            👨‍🏫 İzmir Öğretmen Eğitimi
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div class="section" id="resultsSection" style="display: none;">
+                <div class="section-title">✅ İşleme Sonuçları</div>
+                
+                <div class="result-grid" id="resultsGrid">
+                    <!-- Sonuçlar dinamik olarak eklenir -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/nlp-processor.js"></script>
+    <script>
+        const nlp = new NLPProcessor();
+
+        function processNLP() {
+            const input = document.getElementById('nlpInput').value.trim();
+            
+            if (!input) {
+                alert('Lütfen bir görev açıklaması gir!');
+                return;
+            }
+
+            const result = nlp.processInput(input);
+            displayResults(result);
+        }
+
+        function useExample(text) {
+            document.getElementById('nlpInput').value = text;
+            processNLP();
+        }
+
+        function displayResults(result) {
+            const resultsGrid = document.getElementById('resultsGrid');
+            const resultsSection = document.getElementById('resultsSection');
+
+            const cards = [
+                {
+                    label: 'İl',
+                    value: result.province || '❌ Algılanamadı',
+                    success: !!result.province
+                },
+                {
+                    label: 'Görev Adı',
+                    value: result.title,
+                    success: true
+                },
+                {
+                    label: 'Görev Türü',
+                    value: result.taskType,
+                    success: true
+                },
+                {
+                    label: 'Hedef Grup',
+                    value: result.targetGroup,
+                    success: true
+                },
+                {
+                    label: 'Beklenen Katılımcı',
+                    value: result.expectedParticipants > 0 ? `${result.expectedParticipants} kişi` : 'Belirtilmemiş',
+                    success: result.expectedParticipants > 0
+                },
+                {
+                    label: 'Deadline',
+                    value: new Date(result.deadline).toLocaleDateString('tr-TR'),
+                    success: true
+                },
+                {
+                    label: 'Kaynaklar',
+                    value: result.requiredResources.join(', ') || 'Yok',
+                    success: true
+                },
+                {
+                    label: 'Öncelik',
+                    value: result.priority,
+                    success: true
+                }
+            ];
+
+            resultsGrid.innerHTML = cards
+                .map(card => `
+                    <div class="result-card">
+                        <div class="result-label">${card.label}</div>
+                        <div class="result-value ${card.success ? 'success' : ''}">
+                            ${card.value}
+                        </div>
+                    </div>
+                `)
+                .join('');
+
+            // Confidence göster
+            const confidenceHtml = `
+                <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border);">
+                    <div style="font-size: 13px; font-weight: 600; margin-bottom: 10px;">📊 Güven Seviyeleri</div>
+                    <div class="confidence-bar">
+                        <span>İl:</span>
+                        <div class="confidence-fill">
+                            <div class="confidence-progress" style="width: ${result.confidence.province * 100}%"></div>
+                        </div>
+                        <span>${Math.round(result.confidence.province * 100)}%</span>
+                    </div>
+                    <div class="confidence-bar">
+                        <span>Deadline:</span>
+                        <div class="confidence-fill">
+                            <div class="confidence-progress" style="width: ${result.confidence.deadline * 100}%"></div>
+                        </div>
+                        <span>${Math.round(result.confidence.deadline * 100)}%</span>
+                    </div>
+                    <div class="confidence-bar">
+                        <span>Görev Türü:</span>
+                        <div class="confidence-fill">
+                            <div class="confidence-progress" style="width: ${result.confidence.taskType * 100}%"></div>
+                        </div>
+                        <span>${Math.round(result.confidence.taskType * 100)}%</span>
+                    </div>
+                </div>
+            `;
+
+            resultsGrid.innerHTML += confidenceHtml;
+            resultsSection.style.display = 'block';
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Enter tuşu ile işle
+        document.getElementById('nlpInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && e.ctrlKey) {
+                processNLP();
+            }
+        });
+    </script>
+</body>
+</html>
