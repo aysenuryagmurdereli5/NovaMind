@@ -100,6 +100,7 @@
         /* Main Container */
         .container {
             display: flex;
+            min-height: calc(100vh - 60px);
         }
 
         /* Sidebar */
@@ -108,7 +109,6 @@
             background: var(--dark-surface);
             border-right: 1px solid var(--border);
             padding: 20px;
-            min-height: calc(100vh - 60px);
         }
 
         .sidebar h3 {
@@ -228,11 +228,6 @@
             font-weight: 600;
         }
 
-        /* Status Icons */
-        .status-todo { color: var(--warning); }
-        .status-progress { color: var(--primary); }
-        .status-done { color: var(--success); }
-
         /* Task Cards */
         .tasks-container {
             display: flex;
@@ -256,10 +251,6 @@
             transform: translateY(-2px);
         }
 
-        .task-card:active {
-            cursor: grabbing;
-        }
-
         .task-title {
             font-size: 14px;
             font-weight: 600;
@@ -278,9 +269,6 @@
         .task-deadline {
             font-size: 11px;
             color: var(--text-soft);
-            display: flex;
-            align-items: center;
-            gap: 4px;
         }
 
         .priority-badge {
@@ -418,16 +406,13 @@
             font-size: 13px;
         }
 
-        .btn-cancel:hover {
-            background: var(--border);
+        /* Responsive */
+        @media (max-width: 1400px) {
+            .kanban-board {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
 
-        /* Responsive */
-        @media (max-width: 1200px) {
-    .kanban-board {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
         @media (max-width: 768px) {
             .sidebar {
                 display: none;
@@ -437,13 +422,13 @@
                 padding: 15px;
             }
 
+            .kanban-board {
+                grid-template-columns: 1fr;
+            }
+
             .kanban-header {
                 flex-direction: column;
                 gap: 15px;
-            }
-
-            .kanban-header h1 {
-                font-size: 22px;
             }
         }
     </style>
@@ -457,7 +442,7 @@
         </div>
         <div class="header-right">
             <a href="index.html" class="nav-link">Giriş Yap</a>
-            <a href="#" class="nav-link active">Kanban Board</a>
+            <a href="kanban.html" class="nav-link active">Kanban Board</a>
             <a href="#" class="nav-link">Raporlar</a>
             <button class="btn-logout" onclick="logout()">Çıkış Yap</button>
         </div>
@@ -468,7 +453,7 @@
         <aside class="sidebar">
             <h3>👤 Menü</h3>
             <div class="sidebar-menu">
-                <a href="#" class="sidebar-item active">📋 Kanban Board</a>
+                <a href="kanban.html" class="sidebar-item active">📋 Kanban Board</a>
                 <a href="#" class="sidebar-item">📊 Dashboard</a>
                 <a href="#" class="sidebar-item">⚙️ Ayarlar</a>
                 <a href="#" class="sidebar-item">❓ Yardım</a>
@@ -493,16 +478,12 @@
                 <div class="kanban-column">
                     <div class="column-header">
                         <div class="column-title">
-                            <span class="status-todo">📋</span>
+                            <span>📋</span>
                             Yapılacaklar
                         </div>
                         <div class="column-count" id="todo-count">0</div>
                     </div>
-
-                    <div class="tasks-container" id="todo-tasks">
-                        <!-- Tasks dinamik olarak eklenecek -->
-                    </div>
-
+                    <div class="tasks-container" id="todo-tasks"></div>
                     <button class="add-task-btn" onclick="openModal('todo')">+ Yeni Görev</button>
                 </div>
 
@@ -510,61 +491,45 @@
                 <div class="kanban-column">
                     <div class="column-header">
                         <div class="column-title">
-                            <span class="status-progress">🔄</span>
+                            <span>🔄</span>
                             Yapılıyor
                         </div>
                         <div class="column-count" id="progress-count">0</div>
                     </div>
-
-                    <div class="tasks-container" id="progress-tasks">
-                        <!-- Tasks dinamik olarak eklenecek -->
-                    </div>
-
+                    <div class="tasks-container" id="progress-tasks"></div>
                     <button class="add-task-btn" onclick="openModal('progress')">+ Yeni Görev</button>
                 </div>
+
                 <!-- Column 3: Kontrol Edildi -->
-<div class="kanban-column">
-    <div class="column-header">
-        <div class="column-title">
-            <span style="color: #3b82f6;">🔍</span>
-            Kontrol Edildi
-        </div>
-        <div class="column-count" id="review-count">0</div>
-    </div>
-
-    <div class="tasks-container" id="review-tasks">
-        <!-- Tasks dinamik olarak eklenecek -->
-    </div>
-
-    <button class="add-task-btn" onclick="openModal('review')">+ Yeni Görev</button>
-</div>
-
-<!-- Column 4: Tamamlandı (Bunu aşağıya taşı) -->
-<div class="kanban-column">
-    ...
-</div>
-
-                <!-- Column 3: Tamamlandı -->
                 <div class="kanban-column">
                     <div class="column-header">
                         <div class="column-title">
-                            <span class="status-done">✅</span>
+                            <span>🔍</span>
+                            Kontrol Edildi
+                        </div>
+                        <div class="column-count" id="review-count">0</div>
+                    </div>
+                    <div class="tasks-container" id="review-tasks"></div>
+                    <button class="add-task-btn" onclick="openModal('review')">+ Yeni Görev</button>
+                </div>
+
+                <!-- Column 4: Tamamlandı -->
+                <div class="kanban-column">
+                    <div class="column-header">
+                        <div class="column-title">
+                            <span>✅</span>
                             Tamamlandı
                         </div>
                         <div class="column-count" id="done-count">0</div>
                     </div>
-
-                    <div class="tasks-container" id="done-tasks">
-                        <!-- Tasks dinamik olarak eklenecek -->
-                    </div>
-
+                    <div class="tasks-container" id="done-tasks"></div>
                     <button class="add-task-btn" onclick="openModal('done')">+ Yeni Görev</button>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- Add Task Modal -->
+    <!-- Modal -->
     <div class="modal" id="taskModal">
         <div class="modal-content">
             <div class="modal-header">Yeni Görev Ekle</div>
@@ -599,43 +564,41 @@
         let currentColumn = '';
         let taskId = 0;
 
-        // Mock Tasks
-      const mockTasks = [
-    { id: 1, title: "Ankara Etkinliği Hazırlığı", deadline: "2026-08-30", priority: "high", status: "todo" },
-    { id: 2, title: "İstanbul Semineri Sunum", deadline: "2026-08-28", priority: "high", status: "progress" },
-    { id: 3, title: "İzmir Öğretmen Eğitimi", deadline: "2026-09-05", priority: "medium", status: "todo" },
-    { id: 4, title: "Gaziantep Demo Oturumu", deadline: "2026-08-25", priority: "low", status: "review" },
-    { id: 5, title: "Konya Pilot Programı", deadline: "2026-09-10", priority: "medium", status: "progress" },
-    { id: 6, title: "Diyarbakır Bilişim Eğitimi", deadline: "2026-08-22", priority: "low", status: "done" }
-];
+        const mockTasks = [
+            { id: 1, title: "Ankara Etkinliği Hazırlığı", deadline: "2026-08-30", priority: "high", status: "todo" },
+            { id: 2, title: "İstanbul Semineri Sunum", deadline: "2026-08-28", priority: "high", status: "progress" },
+            { id: 3, title: "İzmir Öğretmen Eğitimi", deadline: "2026-09-05", priority: "medium", status: "todo" },
+            { id: 4, title: "Gaziantep Demo Oturumu", deadline: "2026-08-25", priority: "low", status: "review" },
+            { id: 5, title: "Konya Pilot Programı", deadline: "2026-09-10", priority: "medium", status: "progress" },
+            { id: 6, title: "Diyarbakır Bilişim Eğitimi", deadline: "2026-08-22", priority: "low", status: "done" }
+        ];
 
         let tasks = [...mockTasks];
         taskId = Math.max(...tasks.map(t => t.id)) + 1;
-// Render Tasks
-    function renderTasks() {
-    const todoTasks = tasks.filter(t => t.status === 'todo');
-    const progressTasks = tasks.filter(t => t.status === 'progress');
-    const reviewTasks = tasks.filter(t => t.status === 'review');
-    const doneTasks = tasks.filter(t => t.status === 'done');
 
-    document.getElementById('todo-tasks').innerHTML = todoTasks.map(t => createTaskCard(t)).join('');
-    document.getElementById('progress-tasks').innerHTML = progressTasks.map(t => createTaskCard(t)).join('');
-    document.getElementById('review-tasks').innerHTML = reviewTasks.map(t => createTaskCard(t)).join('');
-    document.getElementById('done-tasks').innerHTML = doneTasks.map(t => createTaskCard(t)).join('');
+        function renderTasks() {
+            const todoTasks = tasks.filter(t => t.status === 'todo');
+            const progressTasks = tasks.filter(t => t.status === 'progress');
+            const reviewTasks = tasks.filter(t => t.status === 'review');
+            const doneTasks = tasks.filter(t => t.status === 'done');
 
-    document.getElementById('todo-count').textContent = todoTasks.length;
-    document.getElementById('progress-count').textContent = progressTasks.length;
-    document.getElementById('review-count').textContent = reviewTasks.length;
-    document.getElementById('done-count').textContent = doneTasks.length;
-}
+            document.getElementById('todo-tasks').innerHTML = todoTasks.map(t => createTaskCard(t)).join('');
+            document.getElementById('progress-tasks').innerHTML = progressTasks.map(t => createTaskCard(t)).join('');
+            document.getElementById('review-tasks').innerHTML = reviewTasks.map(t => createTaskCard(t)).join('');
+            document.getElementById('done-tasks').innerHTML = doneTasks.map(t => createTaskCard(t)).join('');
 
-        // Create Task Card HTML
+            document.getElementById('todo-count').textContent = todoTasks.length;
+            document.getElementById('progress-count').textContent = progressTasks.length;
+            document.getElementById('review-count').textContent = reviewTasks.length;
+            document.getElementById('done-count').textContent = doneTasks.length;
+        }
+
         function createTaskCard(task) {
             const date = new Date(task.deadline);
             const formattedDate = date.toLocaleDateString('tr-TR', { month: 'short', day: 'numeric' });
             
             return `
-                <div class="task-card" draggable="true" ondragstart="dragStart(event)" data-id="${task.id}">
+                <div class="task-card" draggable="true" data-id="${task.id}">
                     <div class="task-title">${task.title}</div>
                     <div class="task-meta">
                         <div class="task-deadline">📅 ${formattedDate}</div>
@@ -647,7 +610,6 @@
             `;
         }
 
-        // Modal Functions
         function openModal(column) {
             currentColumn = column;
             document.getElementById('taskModal').classList.add('active');
@@ -684,34 +646,24 @@
             closeModal();
         }
 
-        // Drag & Drop (Basit)
-        function dragStart(e) {
-            e.dataTransfer.effectAllowed = 'move';
-            e.dataTransfer.setData('taskId', e.target.closest('.task-card').dataset.id);
-        }
-
-        // Logout
         function logout() {
             if (confirm('Çıkmak istediğinizden emin misiniz?')) {
                 window.location.href = 'index.html';
             }
         }
 
-        // Modal dışında tıklamayı kapat
         document.getElementById('taskModal').addEventListener('click', (e) => {
             if (e.target.id === 'taskModal') {
                 closeModal();
             }
         });
 
-        // Enter tuşu ile ekle
         document.addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && document.getElementById('taskModal').classList.contains('active')) {
                 addTask();
             }
         });
 
-        // İlk render
         renderTasks();
     </script>
 </body>
